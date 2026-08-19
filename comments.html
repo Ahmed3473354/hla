@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>التعليقات - تمّني</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+<style>
+
+.community-comment {
+
+    position: relative;
+
+    background: #ffffff;
+
+    border: 1px solid #dcdcdc;
+
+    border-radius: 12px;
+
+    padding: 7px 10px;
+
+    margin-bottom: 8px;
+
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+    box-sizing: border-box;
+}
+
+
+/* رأس التعليق */
+
+.comment-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 6px;
+}
+
+
+/* بيانات صاحب التعليق */
+
+.comment-identity {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+/* دائرة الحرف */
+
+.comment-avatar {
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #f0f0f0;
+
+    font-weight: bold;
+}
+
+
+/* نص التعليق */
+
+.comment-text {
+
+    margin-top: 6px;
+
+    line-height: 1.4;
+
+    word-break: break-word;
+}
+
+
+/* وقت التعليق */
+
+.comment-time {
+
+    margin-top: 4px;
+
+    font-size: 11px;
+
+    color: #777;
+}
+
+
+/* زر الحذف */
+
+.delete-comment-btn {
+
+    width: 30px;
+
+    height: 28px;
+
+    min-width: 40px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+</style>
+
+
+<body>
+
+<main class="app">
+
+    <h1>
+        💬 تعليقات المجتمع
+    </h1>
+
+    <p class="subtitle">
+        شارك معلومات مفيدة يمكن أن تساعد الآخرين
+    </p>
+
+
+    <!-- =========================================
+         إضافة معلومة
+    ========================================== -->
+
+    <section class="card comments-form-card">
+
+        <textarea
+            id="commentInput"
+            maxlength="500"
+            placeholder="اكتب المعلومة... مثال: يوجد خدمة في هذا المكان"
+        ></textarea>
+
+
+        <button
+            id="addCommentBtn"
+            class="safe-button"
+            type="button"
+        >
+            📤 نشر المعلومة
+        </button>
+
+
+        <p
+            id="commentProfileStatus"
+            class="comment-profile-status"
+        >
+            لم يتم حفظ بياناتك بعد.
+        </p>
+
+    </section>
+
+
+    <!-- =========================================
+         قائمة التعليقات
+    ========================================== -->
+
+    <section class="card">
+
+        <h2>
+            📢 آخر المعلومات
+        </h2>
+
+
+        <!--
+            كل تعليق سيصبح div مستقل هنا
+            مثل أعضاء العائلة تمامًا
+        -->
+
+        <div
+            id="commentsList"
+            class="comments-list"
+        >
+
+            <div class="comments-loading">
+                ⏳ جاري تحميل المعلومات...
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         رجوع
+    ========================================== -->
+
+    <button
+        class="chat-back-btn"
+        type="button"
+        onclick="history.back()"
+    >
+        ↩️ رجوع
+    </button>
+
+</main>
+
+
+<script
+    type="module"
+    src="notes/not/comments.js"
+></script>
+
+</body>
+
+</html>
+

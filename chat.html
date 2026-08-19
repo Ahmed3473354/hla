@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>💬 محادثة العائلة - طمّني</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+<body>
+
+    <main class="family-chat-page">
+
+        <section class="chat-card">
+
+            <header class="chat-header">
+
+                <div class="chat-header-icon">
+                    💬
+                </div>
+
+                <div>
+
+                    <h2>
+                        محادثة العائلة
+                    </h2>
+
+                    <p>
+                        تواصلوا واطمئنوا على بعضكم
+                    </p>
+
+                </div>
+
+            </header>
+
+
+            <div
+                id="chatMessages"
+                class="chat-messages"
+            ></div>
+
+
+            <div class="chat-input-area">
+
+                <input
+                    id="chatInput"
+                    type="text"
+                    maxlength="500"
+                    placeholder="اكتب رسالة..."
+                    autocomplete="off"
+                >
+
+                <button
+                    id="sendMessageBtn"
+                    title="إرسال"
+                >
+                    ➤
+                </button>
+
+            </div>
+
+
+            <button
+                class="chat-back-btn"
+                onclick="location.href='index.html'"
+            >
+                ↩️ العودة إلى الصفحة الرئيسية
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <script
+        type="module"
+        src="ccc/chat.js"
+    ></script>
+
+</body>
+
+</html>
