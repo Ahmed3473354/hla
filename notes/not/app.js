@@ -61,6 +61,10 @@ const db = getFirestore(app);
 
 const auth = getAuth(app);
 
+window.securityTest = {
+    getUid: () => auth.currentUser?.uid || null
+};
+
 
 // Debug
 window.testAuth = auth;
