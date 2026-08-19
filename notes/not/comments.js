@@ -637,3 +637,11 @@ addCommentBtn.onclick =
                 "📤 نشر المعلومة";
         }
     };
+    const commentsBackBtn =
+    document.getElementById("commentsBackBtn");
+
+if (commentsBackBtn) {
+    commentsBackBtn.addEventListener("click", () => {
+        history.back();
+    });
+}

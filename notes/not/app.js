@@ -3551,3 +3551,21 @@ function watchMyFamilyMembership(familyId) {
         }
     );
 }
+const openChatBtn =
+    document.getElementById("openChatBtn");
+
+if (openChatBtn) {
+    openChatBtn.addEventListener("click", () => {
+        location.href = "chat.html";
+    });
+}
+
+
+const communityInfoBtn =
+    document.getElementById("communityInfoBtn");
+
+if (communityInfoBtn) {
+    communityInfoBtn.addEventListener("click", () => {
+        location.href = "comments.html";
+    });
+}

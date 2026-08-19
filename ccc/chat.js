@@ -696,3 +696,10 @@ async function leaveFamily() {
 // ==========================================
 
 startChat();
+const chatBackBtn = document.getElementById("chatBackBtn");
+
+if (chatBackBtn) {
+    chatBackBtn.addEventListener("click", () => {
+        location.href = "index.html";
+    });
+}
