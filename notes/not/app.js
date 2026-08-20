@@ -11,6 +11,7 @@ import { initializeApp } from
 
 import {
     collection,
+    updateDoc,
     doc,
     getDoc,
     getDocs,
@@ -18,6 +19,7 @@ import {
     setDoc,
     addDoc,
     deleteDoc,
+    deleteField,
     onSnapshot,
     query,
     where,
@@ -517,13 +519,14 @@ async function findMyFamily() {
 
         for (const familyDoc of familiesSnapshot.docs) {
 
-            const memberRef = doc(
-                db,
-                "families",
-                familyDoc.id,
-                "members",
-                currentUser.uid
-            );
+            const memberRef =
+                doc(
+                    db,
+                    "families",
+                    familyDoc.id,
+                    "members",
+                    currentUser.uid
+                );
 
             const memberSnapshot =
                 await getDoc(memberRef);
@@ -869,6 +872,8 @@ function createFamilyCode() {
 
 async function createFamily() {
 
+   console.trace("🔥 createFamily تم استدعاؤها من هنا"); 
+
     const currentUser =
         auth.currentUser;
 
@@ -940,19 +945,20 @@ async function createFamily() {
         const familyCode =
             createFamilyCode();
 
-
+console.trace("🔥 CREATE FAMILY EXECUTED");
         // =========================================
         // إنشاء مرجع العائلة
         // =========================================
 
-        const familyRef =
-            doc(
-                collection(
-                    db,
-                    "families"
-                )
-            );
+       console.trace("🔥🔥 FAMILY DOCUMENT IS BEING CREATED");
 
+const familyRef =
+    doc(
+        collection(
+            db,
+            "families"
+        )
+    );
 
         // =========================================
         // بيانات المستخدم
@@ -2194,14 +2200,44 @@ async function removeFamilyMember(memberUid) {
                 );
 
             // لا يوجد أعضاء آخرون
-            if (otherMembers.length === 0) {
+           if (otherMembers.length === 0) {
 
-                alert(
-                    "❌ لا يمكن لصاحب العائلة الخروج لأنه لا يوجد عضو آخر يمكنه تولي الملكية."
-                );
+    // لا يوجد أعضاء آخرون
+    // لذلك نترك العائلة بدون صاحب مؤقتًا
+    await updateDoc(
+        familyRef,
+        {
+            createdBy: deleteField()
+        }
+    );
 
-                return;
-            }
+    // حذف صاحب العائلة من members
+    await deleteDoc(
+        doc(
+            db,
+            "families",
+            family.id,
+            "members",
+            currentUser.uid
+        )
+    );
+
+    localStorage.removeItem(FAMILY_KEY);
+    localStorage.removeItem(SAFE_KEY);
+
+    if (familyUnsubscribe) {
+        familyUnsubscribe();
+        familyUnsubscribe = null;
+    }
+
+    alert(
+        "✅ غادرت العائلة بنجاح."
+    );
+
+    location.reload();
+
+    return;
+}
 
             // اختيار عضو عشوائي
             const randomIndex =
@@ -2301,10 +2337,7 @@ async function removeFamilyMember(memberUid) {
 async function leaveFamily() {
 
     const saved =
-        localStorage.getItem(
-            FAMILY_KEY
-        );
-
+        localStorage.getItem("tamny_family");
 
     if (!saved) {
 
@@ -2315,9 +2348,7 @@ async function leaveFamily() {
         return;
     }
 
-
     let family;
-
 
     try {
 
@@ -2326,17 +2357,13 @@ async function leaveFamily() {
 
     } catch {
 
-        alert(
-            "❌ بيانات العائلة غير صحيحة."
-        );
+        localStorage.removeItem("tamny_family");
 
         return;
     }
 
-
     const currentUser =
         auth.currentUser;
-
 
     if (!currentUser) {
 
@@ -2347,37 +2374,50 @@ async function leaveFamily() {
         return;
     }
 
-
-    // منع صاحب العائلة من المغادرة
-    if (
-        family.createdBy ===
-        currentUser.uid
-    ) {
-
-        alert(
-            "👑 أنت صاحب العائلة.\n\n" +
-            "لا يمكنك مغادرة العائلة بهذه الطريقة."
-        );
-
-        return;
-    }
-
-
-    const confirmed =
-        confirm(
-            "⚠️ هل تريد مغادرة العائلة؟"
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
     try {
 
-        await deleteDoc(
+        const familyRef =
+            doc(
+                db,
+                "families",
+                family.id
+            );
 
+        const familySnapshot =
+            await getDoc(
+                familyRef
+            );
+
+        if (!familySnapshot.exists()) {
+
+            localStorage.removeItem(
+                "tamny_family"
+            );
+
+            alert(
+                "❌ العائلة غير موجودة."
+            );
+
+            return;
+        }
+
+        const familyData =
+            familySnapshot.data();
+
+        const confirmed =
+            confirm(
+                "⚠️ هل تريد مغادرة العائلة؟"
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        // =========================================
+        // حذف العضو الحالي
+        // =========================================
+
+        await deleteDoc(
             doc(
                 db,
                 "families",
@@ -2385,18 +2425,89 @@ async function leaveFamily() {
                 "members",
                 currentUser.uid
             )
-
         );
 
+        // =========================================
+        // إذا كان صاحب العائلة
+        // =========================================
+
+        if (
+            familyData.createdBy ===
+            currentUser.uid
+        ) {
+
+            // البحث عن باقي الأعضاء
+            const membersSnapshot =
+                await getDocs(
+                    collection(
+                        db,
+                        "families",
+                        family.id,
+                        "members"
+                    )
+                );
+
+            const otherMembers =
+                membersSnapshot.docs;
+
+            // =====================================
+            // لا يوجد أعضاء آخرون
+            // =====================================
+
+            if (
+                otherMembers.length === 0
+            ) {
+
+                await updateDoc(
+                    familyRef,
+                    {
+                        createdBy:
+                            deleteField()
+                    }
+                );
+
+            }
+
+            // =====================================
+            // يوجد أعضاء
+            // اختيار مالك عشوائي
+            // =====================================
+
+            else {
+
+                const randomIndex =
+                    Math.floor(
+                        Math.random() *
+                        otherMembers.length
+                    );
+
+                const newOwner =
+                    otherMembers[
+                        randomIndex
+                    ].id;
+
+                await updateDoc(
+                    familyRef,
+                    {
+                        createdBy:
+                            newOwner
+                    }
+                );
+
+            }
+        }
+
+        // =========================================
+        // تنظيف بيانات المستخدم المحلية
+        // =========================================
 
         localStorage.removeItem(
-            FAMILY_KEY
+            "tamny_family"
         );
 
         localStorage.removeItem(
             SAFE_KEY
         );
-
 
         if (familyUnsubscribe) {
 
@@ -2406,14 +2517,46 @@ async function leaveFamily() {
                 null;
         }
 
+        // =========================================
+        // تحديث الواجهة
+        // =========================================
+
+        if (familyInfo) {
+
+            familyInfo.innerHTML = `
+                <div class="family-empty">
+                    <p>
+                        👨‍👩‍👧 أنت لست داخل عائلة حاليًا.
+                    </p>
+                </div>
+            `;
+        }
+
+        if (initialSection) {
+            initialSection.classList.add(
+                "hidden"
+            );
+        }
+
+        if (safeSection) {
+            safeSection.classList.add(
+                "hidden"
+            );
+        }
+
+        if (leaveFamilyBtn) {
+            leaveFamilyBtn.classList.add(
+                "hidden"
+            );
+        }
+
+        if (familyMembers) {
+            familyMembers.innerHTML = "";
+        }
 
         alert(
             "✅ تمت مغادرة العائلة بنجاح."
         );
-
-
-        location.reload();
-
 
     } catch (error) {
 
@@ -2428,7 +2571,6 @@ async function leaveFamily() {
         );
     }
 }
-
 
 if (leaveFamilyBtn) {
 
