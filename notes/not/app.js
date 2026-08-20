@@ -3465,7 +3465,7 @@ window.tamny = {
 // 🚀 START
 // ============================================================
 
-startFirebase();
+
 
 function watchMyFamilyMembership(familyId) {
 
@@ -3551,21 +3551,56 @@ function watchMyFamilyMembership(familyId) {
         }
     );
 }
-const openChatBtn =
-    document.getElementById("openChatBtn");
 
-if (openChatBtn) {
-    openChatBtn.addEventListener("click", () => {
-        location.href = "chat.html";
-    });
+startFirebase();
+
+// ============================================================
+// 💬 Chat & Comments Navigation
+// ============================================================
+
+function setupNavigationButtons() {
+
+    const openChatBtn =
+        document.getElementById("openChatBtn");
+
+    if (openChatBtn) {
+
+        openChatBtn.onclick = function () {
+
+            console.log("TEST CHAT");
+
+            window.location.href =
+                "chat.html";
+        };
+    }
+
+
+    const communityInfoBtn =
+        document.getElementById("communityInfoBtn");
+
+    if (communityInfoBtn) {
+
+        communityInfoBtn.onclick = function () {
+
+            console.log("TEST COMMENTS");
+
+            window.location.href =
+                "comments.html";
+        };
+    }
 }
 
 
-const communityInfoBtn =
-    document.getElementById("communityInfoBtn");
+// تشغيل الربط بعد تحميل الصفحة
+if (document.readyState === "loading") {
 
-if (communityInfoBtn) {
-    communityInfoBtn.addEventListener("click", () => {
-        location.href = "comments.html";
-    });
+    document.addEventListener(
+        "DOMContentLoaded",
+        setupNavigationButtons
+    );
+
+} else {
+
+    setupNavigationButtons();
+
 }
