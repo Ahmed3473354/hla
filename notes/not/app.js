@@ -1941,6 +1941,21 @@ async function addFamilyMember() {
         auth.currentUser;
 
 
+        console.log("CURRENT UID:", currentUser.uid);
+console.log("FAMILY ID:", family.id);
+
+const familyDoc = await getDoc(
+    doc(db, "families", family.id)
+);
+
+console.log(
+    "FAMILY DATA:",
+    familyDoc.exists()
+        ? familyDoc.data()
+        : "FAMILY NOT FOUND"
+);
+
+
     if (!currentUser) {
 
         alert(
@@ -2081,48 +2096,33 @@ async function addFamilyMember() {
 // 🗑️ Remove Family Member
 // ============================================================
 
-async function removeFamilyMember(
-    memberUid
-) {
+async function removeFamilyMember(memberUid) {
 
     const saved =
-        localStorage.getItem(
-            FAMILY_KEY
-        );
-
+        localStorage.getItem(FAMILY_KEY);
 
     if (!saved) {
         return;
     }
 
-
     let family;
 
-
     try {
-
-        family =
-            JSON.parse(saved);
-
+        family = JSON.parse(saved);
     } catch {
-
         return;
     }
 
+    if (!family?.id) {
+        return;
+    }
 
-    const currentUser =
-        auth.currentUser;
-
+    const currentUser = auth.currentUser;
 
     if (!currentUser) {
-
-        alert(
-            "❌ Firebase لم يجهز بعد."
-        );
-
+        alert("❌ Firebase لم يجهز بعد.");
         return;
     }
-
 
     try {
 
@@ -2133,66 +2133,139 @@ async function removeFamilyMember(
                 family.id
             );
 
-
         const familySnapshot =
-            await getDoc(
-                familyRef
-            );
-
+            await getDoc(familyRef);
 
         if (!familySnapshot.exists()) {
-
-            alert(
-                "❌ العائلة غير موجودة."
-            );
-
+            alert("❌ العائلة غير موجودة.");
             return;
         }
-
 
         const familyData =
             familySnapshot.data();
 
-
+        // لازم يكون المستخدم هو صاحب العائلة
         if (
             familyData.createdBy !==
             currentUser.uid
         ) {
-
             alert(
                 "❌ إزالة الأعضاء متاحة لصاحب العائلة فقط."
             );
-
             return;
         }
 
+        // ==========================================
+        // صاحب العائلة يحذف نفسه
+        // ==========================================
 
         if (
             memberUid ===
             currentUser.uid
         ) {
 
-            alert(
-                "❌ لا يمكنك إزالة نفسك من هنا."
+            const confirmed =
+                confirm(
+                    "⚠️ أنت صاحب العائلة.\n\n" +
+                    "إذا خرجت من العائلة، سيتم اختيار عضو آخر عشوائيًا ليصبح صاحب العائلة.\n\n" +
+                    "هل تريد المتابعة؟"
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+            // جلب جميع الأعضاء
+            const membersSnapshot =
+                await getDocs(
+                    collection(
+                        db,
+                        "families",
+                        family.id,
+                        "members"
+                    )
+                );
+
+            const otherMembers =
+                membersSnapshot.docs.filter(
+                    memberDoc =>
+                        memberDoc.id !==
+                        currentUser.uid
+                );
+
+            // لا يوجد أعضاء آخرون
+            if (otherMembers.length === 0) {
+
+                alert(
+                    "❌ لا يمكن لصاحب العائلة الخروج لأنه لا يوجد عضو آخر يمكنه تولي الملكية."
+                );
+
+                return;
+            }
+
+            // اختيار عضو عشوائي
+            const randomIndex =
+                Math.floor(
+                    Math.random() *
+                    otherMembers.length
+                );
+
+            const newOwnerDoc =
+                otherMembers[randomIndex];
+
+            const newOwnerUid =
+                newOwnerDoc.id;
+
+            // جعل العضو العشوائي صاحب العائلة
+            await updateDoc(
+                familyRef,
+                {
+                    createdBy:
+                        newOwnerUid
+                }
             );
+
+            // حذف صاحب العائلة القديم
+            await deleteDoc(
+                doc(
+                    db,
+                    "families",
+                    family.id,
+                    "members",
+                    currentUser.uid
+                )
+            );
+
+            // تنظيف بيانات العائلة المحلية
+            localStorage.removeItem(
+                FAMILY_KEY
+            );
+
+            alert(
+                "✅ خرجت من العائلة بنجاح.\n\n" +
+                "👑 تم اختيار عضو آخر عشوائيًا ليصبح صاحب العائلة."
+            );
+
+            // إعادة تحميل الصفحة
+            location.reload();
 
             return;
         }
 
+        // ==========================================
+        // صاحب العائلة يحذف عضوًا آخر
+        // ==========================================
 
         const confirmed =
             confirm(
                 "⚠️ هل أنت متأكد من إزالة هذا العضو؟"
             );
 
-
         if (!confirmed) {
             return;
         }
 
-
         await deleteDoc(
-
             doc(
                 db,
                 "families",
@@ -2200,14 +2273,11 @@ async function removeFamilyMember(
                 "members",
                 memberUid
             )
-
         );
-
 
         alert(
             "✅ تمت إزالة العضو بنجاح."
         );
-
 
     } catch (error) {
 
