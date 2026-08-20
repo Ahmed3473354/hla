@@ -23,9 +23,9 @@
             "value": "strict-origin-when-cross-origin"
           },
           {
-            "key": "Content-Security-Policy",
-            "value": "default-src 'self'; frame-ancestors 'self'"
-          }
+  "key": "Content-Security-Policy",
+  "value": "default-src 'self'; script-src 'self' https://www.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com; frame-ancestors 'self'"
+}
         ]
       }
     ]
