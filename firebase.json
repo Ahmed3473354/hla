@@ -24,7 +24,7 @@
           },
           {
   "key": "Content-Security-Policy",
-  "value": "default-src 'self'; script-src 'self' https://www.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com; frame-ancestors 'self'"
+  "value": "default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-hashes' 'sha256-WogDJERytRnUBRsciVSXze+fgRn2MBJCMvJyrsNofFY=' 'sha256-Ql2mE127lot/ChAcUOsHMH7VdmX3Zyo7WMTPjDQD7Es=' 'sha256-lzJdfbIrLanCuotvr8oHREaslZzgaR/MIPhNS1Fxk4A='; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://www.gstatic.com; frame-ancestors 'self'"
 }
         ]
       }
